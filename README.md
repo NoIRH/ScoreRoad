@@ -5,7 +5,7 @@
 ``` 
     python -m venv .venv
 ```
-   - Если это делает через powershell то вначале нужно дать разврешение на выполнение сторонних скриптов
+   - Если это делает через powershell то вначале нужно дать разрешение на выполнение сторонних скриптов
 ``` 
     Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
