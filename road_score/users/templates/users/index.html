@@ -7,18 +7,14 @@
   <!-- INCLUDE CSS -->
   <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" type="text/css" rel="stylesheet">
   <link href="{% static 'bootstrap-icons/font/bootstrap-icons.min.css' %}" type="text/css" rel="stylesheet">
-  <link href="{% static 'font-awesome-4.7.0/css/font-awesome.min.css' %}" type="text/css" rel="stylesheet">
   <!-- Bootstrap JS + Popper JS -->
-  <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-  <script src="{% static 'jquery/jquery-3.7.1.min.js' %}"></script>
+ 
     <title>Main</title>
 </head>
-
-
 <body class="d-flex flex-column min-vh-100">
   <nav class="navbar navbar-expand-lg bg-body-tertiary gx-5">
     <div class="container-fluid">
-      <a class="navbar-brand" href="#">RodeScore</a>
+      <a class="navbar-brand" href="#">VideoCapturer</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Переключатель навигации">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -39,7 +35,7 @@
               </a>
               {% if user.is_authenticated %}
               <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="">Профиль</a></li>
+                <li><a class="dropdown-item" href="{%url  'user_files' %}">Профиль</a></li>
                 <li>
                   <form  action="{% url 'logout' %}" method="post">
                     {% csrf_token %}
@@ -63,7 +59,7 @@
   </nav>
     <div class="container-fluid">
         {% block content%}
-        <p class="text-center">Приветcтвую
+         <p class="text-center">Приветcтвую
           {% if user.is_authenticated %}
               {{ user.get_username }}
           {% else %}
@@ -76,13 +72,10 @@
     <footer class="mt-auto">
       <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.05);">
         © 2024 Copyright:
-        <a class="text-body" href="/">VRodeScore.com</a>
+        <a class="text-body" href="/">VideoCapturer.com</a>
       </div>
     </footer>
+    <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 </body>
-</html>
 
-   {% block scripts%}
-    <script>
-    </script>
-   {% endblock scripts %} 
+</html>
