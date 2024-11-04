@@ -1,88 +1,119 @@
 <!DOCTYPE html>
-<html lang="ru-en">
+<html lang="ru">
 <head>
     {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- INCLUDE CSS -->
-  <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" type="text/css" rel="stylesheet">
-  <link href="{% static 'bootstrap-icons/font/bootstrap-icons.min.css' %}" type="text/css" rel="stylesheet">
-  <link href="{% static 'font-awesome-4.7.0/css/font-awesome.min.css' %}" type="text/css" rel="stylesheet">
-  <!-- Bootstrap JS + Popper JS -->
+    <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" type="text/css" rel="stylesheet">
+    <link href="{% static 'font-awesome-4.7.0/css/font-awesome.min.css' %}" type="text/css" rel="stylesheet">
+    <!-- Font Awesome 5 для звезд -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <title>Main</title>
+    <style>
+        .rating {
+            color: gold;
+            font-size: 2rem;
+        }
+        .large-text {
+            font-size: 3rem;
+            font-weight: bold;
+        }
+        .small-text {
+            font-size: 1rem;
+            color: gray;
+        }
+    </style>
+</head>
+<body class="d-flex flex-column min-vh-100">
+  <!-- Контент страницы -->
+  <nav class="navbar navbar-expand-lg bg-body-tertiary gx-5">
+    <!-- Navbar Content -->
+  </nav>
+
+  <div class="container">
+      <button id="myInput" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myModal">
+          Оценить маршрут
+      </button>
+  </div>
+
+  <!-- Modal для оценки -->
+  <div class="modal" tabindex="-1" id="myModal">
+      <div class="modal-dialog">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <h5 class="modal-title">Оцените пройденный маршрут</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                  <div class="text-center">
+                      <div id="average-rating" class="large-text"></div>
+                      <div id="average-stars" class="rating"></div>
+                      <div id="total-reviews" class="small-text"></div>
+                  </div>
+
+                  <hr>
+
+                  <div class="text-center mt-4">
+                      <div class="small-text">Оцените</div>
+                      <div id="user-rating" class="rating mt-2"></div>
+                  </div>
+
+                  <div class="text-center mt-4">
+                      <button class="btn btn-primary" onclick="changeRating()">Изменить оценку</button>
+                  </div>
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                  <button type="button" class="btn btn-primary">Сохранить изменения</button>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <footer class="mt-auto">
+      <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.05);">
+          © 2024 Copyright:
+          <a class="text-body" href="/">VRodeScore.com</a>
+      </div>
+  </footer>
+
+  <!-- Подключение скриптов -->
   <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
   <script src="{% static 'jquery/jquery-3.7.1.min.js' %}"></script>
-    <title>Main</title>
-</head>
 
+  <script>
+      let averageRating = 4.5;
+      let totalRatings = 1500;
+      let userRating = 4;
 
-<body class="d-flex flex-column min-vh-100">
-  <nav class="navbar navbar-expand-lg bg-body-tertiary gx-5">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="#">RodeScore</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Переключатель навигации">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="/">Главная</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="/info"><i class="bi bi-patch-question"></i></a>
-          </li>
-        </ul>
-        <div class="d-flex">
-          <ul class="navbar-nav me-auto mb-2">
-            <li class="nav-item dropstart">
-              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <h8> <i class="bi bi-file-lock2-fill"></i></h8>
-              </a>
-              {% if user.is_authenticated %}
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="">Профиль</a></li>
-                <li>
-                  <form  action="{% url 'logout' %}" method="post">
-                    {% csrf_token %}
-                    <button class ="dropdown-item" type="submit">Выход</button>
-                 </form>
-                </li>
-              </ul>
-            	{% else %}
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="{% url 'login' %}">Вход</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="{% url 'register' %}">Регистрация</a></li>
-              </ul>
-          	  {% endif %}
-             
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </nav>
-    <div class="container-fluid">
-        {% block content%}
-        <p class="text-center">Приветcтвую
-          {% if user.is_authenticated %}
-              {{ user.get_username }}
-          {% else %}
-              Незнакомец
-          {% endif %}
-          в этом прекрасном месте
-         </p>
-        {% endblock content %}     
-    </div>
-    <footer class="mt-auto">
-      <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.05);">
-        © 2024 Copyright:
-        <a class="text-body" href="/">VRodeScore.com</a>
-      </div>
-    </footer>
+      function updateDisplay() {
+          document.getElementById('average-rating').innerText = averageRating.toFixed(1);
+          document.getElementById('total-reviews').innerText = `${totalRatings} оценок`;
+          updateStars('average-stars', Math.round(averageRating));
+          updateStars('user-rating', userRating);
+      }
+
+      function updateStars(elementId, rating) {
+          const element = document.getElementById(elementId);
+          element.innerHTML = '';  // Очищаем элемент перед добавлением звезд
+          for (let i = 0; i < 5; i++) {
+              const star = document.createElement('i');
+              // Добавляем полную или пустую звезду в зависимости от текущего рейтинга
+              star.className = i < rating ? 'fas fa-star' : 'far fa-star';
+              element.appendChild(star);
+          }
+      }
+
+      function changeRating() {
+          averageRating = (Math.random() * 5).toFixed(1);
+          totalRatings = Math.floor(Math.random() * 2000) + 1;
+          userRating = Math.floor(Math.random() * 5) + 1;
+          updateDisplay();
+      }
+
+      // Первоначальное отображение
+      updateDisplay();
+  </script>
 </body>
 </html>
 
-   {% block scripts%}
-    <script>
-    </script>
-   {% endblock scripts %} 
