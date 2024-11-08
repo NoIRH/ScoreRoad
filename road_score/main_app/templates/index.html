@@ -3,9 +3,7 @@
 <head>
     <title>Быстрый старт. Размещение интерактивной карты на странице</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <!-- <script src="https://api-maps.yandex.ru/2.0/?apikey=801caa4c-40cc-48be-bcfd-f7f196abd4f3&lang=ru_RU"></script> -->
     <script src="https://api-maps.yandex.ru/2.1/?apikey=801caa4c-40cc-48be-bcfd-f7f196abd4f3&load=package.full&lang=ru-RU" type="text/javascript"></script>
-    <!-- <script src="https://api-maps.yandex.ru/2.0-stable/?apikey=801caa4c-40cc-48be-bcfd-f7f196abd4f3&load=package.full&lang=ru-RU" type="text/javascript"></script> -->
 
     <style>
         html, body {
@@ -28,14 +26,6 @@
         <input type="text" id="end" placeholder="Введите адрес прибытия">
         <button id="routeButton">Построить маршрут</button>
     </div>
-    <!-- <div id="myMap"></div> -->
-
-
-
-
-
-
-
 <script>
 
 ymaps.ready(init);
@@ -45,7 +35,6 @@ function init() {
         center: [55.75, 37.61],
         zoom: 10
     });
-
 
     var multiRoute;
 
@@ -84,7 +73,6 @@ function init() {
                         }, {
                             boundsAutoApply: true
                         });
-                        // console.log(multiRoute.getViaPoints());
                         // Добавляем маршрут на карту
                         myMap.geoObjects.add(multiRoute);
                         
@@ -100,124 +88,11 @@ function init() {
                     alert('Не удалось найти указанные адреса. Пожалуйста, проверьте их.');
                 });
             };
-
-            
-            // for (var i=0; i<multiRoute.getCoordinates;i++)
-            // {
-            //     console.log()
-            // }
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // myMap.controls
-        // .add('mapTools')       // стандартные кнопки
-        // .add('typeSelector')   // переключатель типа карты
-        // .add('zoomControl');   // изменение масштаба
-    // var myPlacemark = new ymaps.Placemark([55.75, 37.61], { 
-    //     iconContent: 'Москва', 
-    //     balloonContent: 'Столица России' 
-    // }, {
-    //     preset: 'twirl#blueStretchyIcon'
-    // });
-    // myMap.geoObjects.add(myPlacemark);
-
-
-
-
-
-
-
-
-
-
-
-    // var startPoint, endPoint;
-
-    //         // Добавляем обработчики клика на карту
-    //         myMap.events.add('click', function (e) {
-    //             var coords = e.get('coords');
-    //             console.log(coords);
-    //             if (!startPoint) {
-    //                 startPoint = coords;
-    //                 myMap.geoObjects.add(new ymaps.Placemark(startPoint, {
-    //                     balloonContent: 'Точка отправления'
-    //                 }, {
-    //                     preset: 'islands#icon',
-    //                     iconColor: '#0095b6'
-    //                 }));
-    //             } else if (!endPoint) {
-    //                 endPoint = coords;
-    //                 myMap.geoObjects.add(new ymaps.Placemark(endPoint, {
-    //                     balloonContent: 'Точка прибытия'
-    //                 }, {
-    //                     preset: 'islands#icon',
-    //                     iconColor: '#ff0000'
-    //                 }));
-
-    //                 // Проложить маршрут
-    //                 route();
-    //             }
-    //         });
-
-    //         // Функция для построения маршрута
-    //         function route() {
-    //             if (startPoint && endPoint) {
-    //                 // Загружаем модуль multiRouter
-    //                 ymaps.modules.require(['multiRouter.MultiRoute'], function(MultiRoute) {
-    //                     var multiRoute = new MultiRoute({
-    //                         referencePoints: [startPoint, endPoint],
-    //                         params: {
-    //                             results: 1
-    //                         }
-    //                     }, {
-    //                         boundsAutoApply: true
-    //                     });
-
-    //                     myMap.geoObjects.add(multiRoute);
-    //                 });
-    //             } else {
-    //                 alert('Пожалуйста, выберите обе точки.');
-    //             }
-    //         }
-
- 
-
-
-    // Создание экземпляра маршрута.
-//     var multiRoute = new ymaps.multiRouter.MultiRoute({   
-//         // Точки маршрута.
-//         // Обязательное поле. 
-//         referencePoints: [
-//             'Москва, метро Смоленская',
-//             'Москва, метро Арбатская',
-//             [55.734876, 37.59308], // улица Льва Толстого.
-//         ]
-//     }, {
-//       // Автоматически устанавливать границы карты так,
-//       // чтобы маршрут был виден целиком.
-//       boundsAutoApply: true
-// });
-    // Добавление маршрута на карту.
-    // myMap.geoObjects.add(multiRoute);
 }
-
-
-
 </script>
 
 </head>
 <body >
-    <!-- <div id="map" style="width: 600px; height: 400px"></div> -->
     <div class="my-div" id="myMap">
         
     </div>
