@@ -11,6 +11,73 @@
   <!-- Bootstrap JS + Popper JS -->
   <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
   <script src="{% static 'jquery/jquery-3.7.1.min.js' %}"></script>
+  <script src="https://api-maps.yandex.ru/2.1/?apikey=801caa4c-40cc-48be-bcfd-f7f196abd4f3&load=package.full&lang=ru-RU" type="text/javascript"></script>
+  {% block scripts%}
+  <script>
+    ymaps.ready(init);
+
+    function init() {
+      var myMap = new ymaps.Map ('myMap', {
+          center: [55.75, 37.61],
+          zoom: 10
+      });
+
+      var multiRoute;
+
+              document.getElementById('routeButton').onclick = function() {
+                  // var startAddress = "Москва, Инновационный центр Сколково, Большой бульвар";
+                  var startAddress = document.getElementById('start').value;
+                  // var endAddress = "Красная площадь, Москва";
+                  var endAddress = document.getElementById('end').value;
+
+                  console.log(startAddress);
+                  console.log(endAddress);
+
+                  if (multiRoute) {
+                      myMap.geoObjects.remove(multiRoute);
+                  }
+
+                  // Создаем геокодер для преобразования адресов в координаты
+                  var geocoder = ymaps.geocode;
+
+                  // Получаем координаты отправления
+                  geocoder(startAddress).then(function (res) {
+                      var startCoords = res.geoObjects.get(0).geometry.getCoordinates();
+
+                      // Получаем координаты прибытия
+                      return geocoder(endAddress).then(function (res) {
+                          var endCoords = res.geoObjects.get(0).geometry.getCoordinates();
+
+                          console.log(startCoords);
+                          console.log(endCoords);
+                          // Создаем маршрут
+                          multiRoute = new ymaps.multiRouter.MultiRoute({
+                              referencePoints: [startCoords, endCoords],
+                              params: {
+                                  results: 1
+                              }
+                          }, {
+                              boundsAutoApply: true
+                          });
+                          // Добавляем маршрут на карту
+                          myMap.geoObjects.add(multiRoute);
+                          
+                          // // Получаем координаты всех точек маршрута
+                          // var routeCoordinates = multiRoute.getCoordinates();
+                          // console.log('Координаты всех точек маршрута:');
+                          // routeCoordinates.forEach(function(coords) {
+                          //     console.log(`Широта: ${coords[1]}, Долгота: ${coords[0]}`);
+                          // });
+
+                      });
+                  }).catch(function (error) {
+                      alert('Не удалось найти указанные адреса. Пожалуйста, проверьте их.');
+                  });
+              };
+    }
+  </script>
+ {% endblock scripts %} 
+
     <title>Main</title>
 </head>
 
@@ -18,7 +85,7 @@
 <body class="d-flex flex-column min-vh-100">
   <nav class="navbar navbar-expand-lg bg-body-tertiary gx-5">
     <div class="container-fluid">
-      <a class="navbar-brand" href="#">RodeScore</a>
+      <a class="navbar-brand" href="#">RoadScore</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Переключатель навигации">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -71,18 +138,43 @@
           {% endif %}
           в этом прекрасном месте
          </p>
+         {% if user.is_authenticated %}
+         <div class = "row">
+          <div class = 'col-4 '>
+             <div class="input-group input-group-sm mb-3">
+              <span class="input-group-text" id="inputGroup-sizing-sm">Точка отправления:</span>
+              <input type="text"  id="start"  class="form-control"  placeholder="Введите адрес отправления" aria-label="Введите адрес отправления" aria-describedby="inputGroup-sizing-sm">
+            </div>
+          </div>
+          <div class = 'col-4'>
+            <div class="input-group input-group-sm mb-3">
+              <span class="input-group-text" id="inputGroup-sizing-sm">Точка прибытия:</span>
+              <input type="text"  id="end"  class="form-control" placeholder="Введите адрес прибытия"aria-describedby="inputGroup-sizing-sm">
+            </div>
+          </div>
+          <div class = 'col-4'>
+            <div class="input-group mb-3">
+              <button id="routeButton" class ="btn btn-sm btn-info">Построить маршрут</button>
+              <button  class ="btn btn-sm btn-warning">Оценить качество дороги</button>
+            </div>
+            
+          </div>
+         </div>
+         <div class = "row">
+          <div class="col-12" id="myMap">
+              
+          </div>
+         </div>
+        
+         {% endif %}
         {% endblock content %}     
     </div>
     <footer class="mt-auto">
       <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.05);">
         © 2024 Copyright:
-        <a class="text-body" href="/">RodeScore.com</a>
+        <a class="text-body" href="/">RoadScore.com</a>
       </div>
     </footer>
 </body>
 </html>
 
-   {% block scripts%}
-    <script>
-    </script>
-   {% endblock scripts %} 
