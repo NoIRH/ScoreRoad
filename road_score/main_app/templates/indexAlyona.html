@@ -1,0 +1,100 @@
+    <!DOCTYPE html>
+<html>
+<head>
+    <title>Быстрый старт. Размещение интерактивной карты на странице</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=801caa4c-40cc-48be-bcfd-f7f196abd4f3&load=package.full&lang=ru-RU" type="text/javascript"></script>
+
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+        .my-div {
+            width: 100%;
+            height: 100%;
+            background-color: lightblue;
+        }
+        </style>
+
+
+    <div>
+        <label for="start">Точка отправления:</label>
+        <input type="text" id="start" placeholder="Введите адрес отправления">
+        <label for="end">Точка прибытия:</label>
+        <input type="text" id="end" placeholder="Введите адрес прибытия">
+        <button id="routeButton">Построить маршрут</button>
+    </div>
+<script>
+
+ymaps.ready(init);
+
+function init() {
+    var myMap = new ymaps.Map ('myMap', {
+        center: [55.75, 37.61],
+        zoom: 10
+    });
+
+    var multiRoute;
+
+            document.getElementById('routeButton').onclick = function() {
+                // var startAddress = "Москва, Инновационный центр Сколково, Большой бульвар";
+                var startAddress = document.getElementById('start').value;
+                // var endAddress = "Красная площадь, Москва";
+                var endAddress = document.getElementById('end').value;
+
+                console.log(startAddress);
+                console.log(endAddress);
+
+                if (multiRoute) {
+                    myMap.geoObjects.remove(multiRoute);
+                }
+
+                // Создаем геокодер для преобразования адресов в координаты
+                var geocoder = ymaps.geocode;
+
+                // Получаем координаты отправления
+                geocoder(startAddress).then(function (res) {
+                    var startCoords = res.geoObjects.get(0).geometry.getCoordinates();
+
+                    // Получаем координаты прибытия
+                    return geocoder(endAddress).then(function (res) {
+                        var endCoords = res.geoObjects.get(0).geometry.getCoordinates();
+
+                        console.log(startCoords);
+                        console.log(endCoords);
+                        // Создаем маршрут
+                        multiRoute = new ymaps.multiRouter.MultiRoute({
+                            referencePoints: [startCoords, endCoords],
+                            params: {
+                                results: 1
+                            }
+                        }, {
+                            boundsAutoApply: true
+                        });
+                        // Добавляем маршрут на карту
+                        myMap.geoObjects.add(multiRoute);
+                        
+                        // // Получаем координаты всех точек маршрута
+                        // var routeCoordinates = multiRoute.getCoordinates();
+                        // console.log('Координаты всех точек маршрута:');
+                        // routeCoordinates.forEach(function(coords) {
+                        //     console.log(`Широта: ${coords[1]}, Долгота: ${coords[0]}`);
+                        // });
+
+                    });
+                }).catch(function (error) {
+                    alert('Не удалось найти указанные адреса. Пожалуйста, проверьте их.');
+                });
+            };
+}
+</script>
+
+</head>
+<body >
+    <div class="my-div" id="myMap">
+        
+    </div>
+</body>
+</html>
