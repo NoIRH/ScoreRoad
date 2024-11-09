@@ -8,75 +8,30 @@
   <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" type="text/css" rel="stylesheet">
   <link href="{% static 'bootstrap-icons/font/bootstrap-icons.min.css' %}" type="text/css" rel="stylesheet">
   <link href="{% static 'font-awesome-4.7.0/css/font-awesome.min.css' %}" type="text/css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
   <!-- Bootstrap JS + Popper JS -->
   <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
   <script src="{% static 'jquery/jquery-3.7.1.min.js' %}"></script>
   <script src="https://api-maps.yandex.ru/2.1/?apikey=801caa4c-40cc-48be-bcfd-f7f196abd4f3&load=package.full&lang=ru-RU" type="text/javascript"></script>
-  {% block scripts%}
-  <script>
-    ymaps.ready(init);
-
-    function init() {
-      var myMap = new ymaps.Map ('myMap', {
-          center: [55.75, 37.61],
-          zoom: 10
-      });
-
-      var multiRoute;
-
-              document.getElementById('routeButton').onclick = function() {
-                  // var startAddress = "Москва, Инновационный центр Сколково, Большой бульвар";
-                  var startAddress = document.getElementById('start').value;
-                  // var endAddress = "Красная площадь, Москва";
-                  var endAddress = document.getElementById('end').value;
-
-                  console.log(startAddress);
-                  console.log(endAddress);
-
-                  if (multiRoute) {
-                      myMap.geoObjects.remove(multiRoute);
-                  }
-
-                  // Создаем геокодер для преобразования адресов в координаты
-                  var geocoder = ymaps.geocode;
-
-                  // Получаем координаты отправления
-                  geocoder(startAddress).then(function (res) {
-                      var startCoords = res.geoObjects.get(0).geometry.getCoordinates();
-
-                      // Получаем координаты прибытия
-                      return geocoder(endAddress).then(function (res) {
-                          var endCoords = res.geoObjects.get(0).geometry.getCoordinates();
-
-                          console.log(startCoords);
-                          console.log(endCoords);
-                          // Создаем маршрут
-                          multiRoute = new ymaps.multiRouter.MultiRoute({
-                              referencePoints: [startCoords, endCoords],
-                              params: {
-                                  results: 1
-                              }
-                          }, {
-                              boundsAutoApply: true
-                          });
-                          // Добавляем маршрут на карту
-                          myMap.geoObjects.add(multiRoute);
-                          
-                          // // Получаем координаты всех точек маршрута
-                          // var routeCoordinates = multiRoute.getCoordinates();
-                          // console.log('Координаты всех точек маршрута:');
-                          // routeCoordinates.forEach(function(coords) {
-                          //     console.log(`Широта: ${coords[1]}, Долгота: ${coords[0]}`);
-                          // });
-
-                      });
-                  }).catch(function (error) {
-                      alert('Не удалось найти указанные адреса. Пожалуйста, проверьте их.');
-                  });
-              };
+  <style>
+    .rating {
+        color: gold;
+        font-size: 2rem;
     }
-  </script>
- {% endblock scripts %} 
+    .large-text {
+        font-size: 3rem;
+        font-weight: bold;
+    }
+    .small-text {
+        font-size: 1rem;
+        color: gray;
+    }
+    .my-div {
+            width: 100%;
+            height: 100%;
+            background-color: lightblue;
+        }
+</style>
 
     <title>Main</title>
 </head>
@@ -155,20 +110,42 @@
           <div class = 'col-4'>
             <div class="input-group mb-3">
               <button id="routeButton" class ="btn btn-sm btn-info">Построить маршрут</button>
-              <button  class ="btn btn-sm btn-warning">Оценить качество дороги</button>
+              <button id="myInput" data-bs-toggle="modal" data-bs-target="#myModal" class ="btn btn-sm btn-warning">Оценить качество дороги</button>
             </div>
             
           </div>
          </div>
-         <div class = "row">
-          <div class="col-12" id="myMap">
-              
+       
+         <div class = "row" style=" height: 100%;">
+            <div class="col-12 " id="myMap" style=" height: 500px; width: 100%; background-color: lightblue;">
           </div>
          </div>
-        
-         {% endif %}
+          {% endif %}
+         
         {% endblock content %}     
     </div>
+     <!-- Modal для оценки -->
+     <div class="modal" tabindex="-1" id="myModal">
+      <div class="modal-dialog">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <h5 class="modal-title">Оцените пройденный маршрут</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+
+
+                  <div class="text-center mt-4">
+                      <div class="small-text">Оцените </div>
+                      <div id="user-rating" class="rating mt-2"></div>
+                  </div>
+              </div>
+              <div class="modal-footer">
+                      <button type="button" class="btn btn-primary" onclick="saveChanges()">Сохранить изменения</button>          
+              </div>
+          </div>
+      </div>
+  </div>
     <footer class="mt-auto">
       <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.05);">
         © 2024 Copyright:
@@ -177,4 +154,134 @@
     </footer>
 </body>
 </html>
+{% block scripts%}
+<script>
+ 
+  function init() {
+    var myMap = new ymaps.Map ('myMap', {
+        center: [55.75, 37.61],
+        zoom: 10
+    });
 
+    var multiRoute;
+
+            document.getElementById('routeButton').onclick = function() {
+                // var startAddress = "Москва, Инновационный центр Сколково, Большой бульвар";
+                var startAddress = document.getElementById('start').value;
+                // var endAddress = "Красная площадь, Москва";
+                var endAddress = document.getElementById('end').value;
+
+                console.log(startAddress);
+                console.log(endAddress);
+
+                if (multiRoute) {
+                    myMap.geoObjects.remove(multiRoute);
+                }
+
+                // Создаем геокодер для преобразования адресов в координаты
+                var geocoder = ymaps.geocode;
+
+                // Получаем координаты отправления
+                geocoder(startAddress).then(function (res) {
+                    var startCoords = res.geoObjects.get(0).geometry.getCoordinates();
+
+                    // Получаем координаты прибытия
+                    return geocoder(endAddress).then(function (res) {
+                        var endCoords = res.geoObjects.get(0).geometry.getCoordinates();
+
+                        console.log(startCoords);
+                        console.log(endCoords);
+                        // Создаем маршрут
+                        multiRoute = new ymaps.multiRouter.MultiRoute({
+                            referencePoints: [startCoords, endCoords],
+                            params: {
+                                results: 1
+                            }
+                        }, {
+                            boundsAutoApply: true
+                        });
+                        // Добавляем маршрут на карту
+                        myMap.geoObjects.add(multiRoute);
+                        
+                        // // Получаем координаты всех точек маршрута
+                        // var routeCoordinates = multiRoute.getCoordinates();
+                        // console.log('Координаты всех точек маршрута:');
+                        // routeCoordinates.forEach(function(coords) {
+                        //     console.log(`Широта: ${coords[1]}, Долгота: ${coords[0]}`);
+                        // });
+
+                    });
+                }).catch(function (error) {
+                    alert('Не удалось найти указанные адреса. Пожалуйста, проверьте их.');
+                });
+            };
+  }
+  $(document).ready(
+    function(){
+      ymaps.ready(init);
+    }
+  );
+</script>
+<script>
+  let averageRating = 4.5;
+  let totalRatings = 1500;
+  let userRating = 4;
+
+  function updateDisplay() {
+      // document.getElementById('average-rating').innerText = averageRating.toFixed(1);
+      // document.getElementById('total-reviews').innerText = `${totalRatings} оценок`;
+      // updateStars('average-stars', Math.round(averageRating));
+      updateStars('user-rating', userRating);
+  }
+
+  function updateStars(elementId, rating) {
+      const element = document.getElementById(elementId);
+      element.innerHTML = '';
+      for (let i = 1; i <= 5; i++) {
+          const star = document.createElement('i');
+          star.className = i <= rating ? 'fas fa-star' : 'far fa-star';
+          if (elementId === 'user-rating') {
+              star.style.cursor = 'pointer';
+              star.addEventListener('click', () => setUserRating(i));
+              star.addEventListener('mouseover', () => highlightStars(i));
+              star.addEventListener('mouseout', () => resetStars());
+          }
+          element.appendChild(star);
+      }
+  }
+
+  function setUserRating(rating) {
+      userRating = rating;
+      updateStars('user-rating', userRating);
+  }
+
+  function highlightStars(rating) {
+      const stars = document.getElementById('user-rating').children;
+      for (let i = 0; i < stars.length; i++) {
+          stars[i].className = i < rating ? 'fas fa-star' : 'far fa-star';
+      }
+  }
+
+  function resetStars() {
+      updateStars('user-rating', userRating);
+  }
+
+  function enableRating() {
+      const userRatingElement = document.getElementById('user-rating');
+      userRatingElement.style.pointerEvents = 'auto';
+  }
+
+  function saveChanges() {
+      alert(`Оценка ${userRating} сохранена!`);
+      // Здесь можно добавить код для отправки данных на сервер
+      const userRatingElement = document.getElementById('user-rating');
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+      const userRatingElement = document.getElementById('user-rating');
+      enableRating();
+      updateDisplay();
+  });
+</script>
+
+{% endblock scripts %} 
