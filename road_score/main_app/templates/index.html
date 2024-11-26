@@ -164,6 +164,7 @@
     });
 
     var multiRoute;
+    var routeCoordinates;
 
             document.getElementById('routeButton').onclick = function() {
                 // var startAddress = "Москва, Инновационный центр Сколково, Большой бульвар";
@@ -209,6 +210,9 @@
                         // routeCoordinates.forEach(function(coords) {
                         //     console.log(`Широта: ${coords[1]}, Долгота: ${coords[0]}`);
                         // });
+
+                        
+                        routeCoordinates = multiRoute.getCoordinates();
 
                     });
                 }).catch(function (error) {
@@ -270,10 +274,39 @@
       const userRatingElement = document.getElementById('user-rating');
       userRatingElement.style.pointerEvents = 'auto';
   }
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Check if this cookie string begins with the name we want
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
 
   function saveChanges() {
       alert(`Оценка ${userRating} сохранена!`);
       // Здесь можно добавить код для отправки данных на сервер
+    
+      const csrftoken = getCookie('csrftoken');
+      data = {
+        "mark":userRating,
+        "points":[],
+        'csrfmiddlewaretoken':csrftoken
+      }
+      $.post(
+        "/save_user_mark/",
+        data,
+        function(response){
+
+        }
+      )
       const userRatingElement = document.getElementById('user-rating');
   }
 
