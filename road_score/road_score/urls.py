@@ -27,4 +27,5 @@ urlpatterns = [
     path('profile/', user_views.profile, name='profile'),
     path('login/', UserLoginView.as_view(template_name='users/login.html'), name='login'),
     path('logout/', UserLogoutView.as_view(), name='logout'),
+    path("save_user_mark/", views.save_user_mark, name ="save_user_mark"),
 ]
