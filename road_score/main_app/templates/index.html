@@ -31,6 +31,29 @@
             height: 100%;
             background-color: lightblue;
         }
+        .input-group {
+    position: relative; /* Устанавливаем относительное позиционирование для родительского контейнера */
+}
+
+.suggestions {
+    border: 1px solid #ccc;
+    max-height: 150px; /* Ограничиваем высоту для скроллинга */
+    overflow-y: auto; /* Добавляем скроллинг, если превышает max-height */
+    position: absolute; /* Позиционируем подсказки абсолютно */
+    background-color: white; /* Фон подсказок */
+    width: 100%; /* Подсказки занимают всю ширину поля ввода */
+    z-index: 1000; /* Повышаем z-index, чтобы они были выше других элементов */
+    margin-top: 0; /* Убираем отступ сверху */
+    display: none; /* Изначально скрываем подсказки */
+}
+
+.suggestion-item {
+    padding: 8px; /* Отступы для элементов подсказок */
+    cursor: pointer; /* Курсор при наведении */
+}
+
+.suggestion-item:hover {
+    background-color: #f0f0f0; /* Цвет фона при наведении на элемент подсказки */}
 </style>
 
     <title>Main</title>
@@ -95,16 +118,21 @@
          </p>
          {% if user.is_authenticated %}
          <div class = "row">
-          <div class = 'col-4 '>
-             <div class="input-group input-group-sm mb-3">
-              <span class="input-group-text" id="inputGroup-sizing-sm">Точка отправления:</span>
-              <input type="text"  id="start"  class="form-control"  placeholder="Введите адрес отправления" aria-label="Введите адрес отправления" aria-describedby="inputGroup-sizing-sm">
-            </div>
-          </div>
-          <div class = 'col-4'>
+          <div class='col-4'>
             <div class="input-group input-group-sm mb-3">
-              <span class="input-group-text" id="inputGroup-sizing-sm">Точка прибытия:</span>
-              <input type="text"  id="end"  class="form-control" placeholder="Введите адрес прибытия"aria-describedby="inputGroup-sizing-sm">
+                <span class="input-group-text" id="inputGroup-sizing-sm">Точка отправления:</span>
+                <input type="text" id="start" class="form-control" placeholder="Введите адрес отправления" aria-label="Введите адрес отправления" aria-describedby="inputGroup-sizing-sm">
+                <div id="suggestions-start" class="suggestions">
+                  
+                </div>
+            </div>
+        </div>
+        
+        <div class='col-4'>
+            <div class="input-group input-group-sm mb-3">
+                <span class="input-group-text" id="inputGroup-sizing-sm">Точка прибытия:</span>
+                <input type="text" id="end" class="form-control" placeholder="Введите адрес прибытия" aria-describedby="inputGroup-sizing-sm">
+                <div id="suggestions-end" class="suggestions"></div>
             </div>
           </div>
           <div class = 'col-4'>
@@ -156,15 +184,72 @@
 </html>
 {% block scripts%}
 <script>
- 
+ var routePoints = [];
   function init() {
     var myMap = new ymaps.Map ('myMap', {
         center: [55.75, 37.61],
         zoom: 10
     });
 
+    const apiKey = 'c76beae4-d0a1-4986-a5f2-3e4459c278b4'; // Замените YOUR_API_KEY вашим реальным API-ключом Яндекс.Карт
+    const inputStart = document.getElementById('start');
+const inputEnd = document.getElementById('end');
+const suggestionsStart = document.getElementById('suggestions-start');
+const suggestionsEnd = document.getElementById('suggestions-end');
+
+function fetchSuggestions(input, suggestionsContainer) {
+    const text = input.value;
+
+    if (text.length < 3) {
+        suggestionsContainer.innerHTML = ''; // Очищаем подсказки, если ввод меньше 3 символов
+        suggestionsContainer.style.display = 'none'; // Скрываем контейнер подсказок
+        return;
+    }
+
+    fetch(`https://suggest-maps.yandex.ru/v1/suggest?apikey=${apiKey}&text=${encodeURIComponent(text)}&print_address=1&attrs=uri`)
+        .then(response => response.json())
+        .then(data => {
+            renderSuggestions(data.results, suggestionsContainer, input);
+        })
+        .catch(error => {
+            console.error('Ошибка при получении подсказок:', error);
+        });
+}
+
+function renderSuggestions(results, container, input) {
+    container.innerHTML = ''; // Очищаем предыдущие подсказки
+
+    if (results.length === 0) {
+        container.style.display = 'none'; // Если нет результатов, скрываем контейнер
+        return;
+    }
+
+    results.forEach(result => {
+        const item = document.createElement('div');
+        item.classList.add('suggestion-item');
+        item.textContent = result.address.formatted_address; // Выводим текст подсказки
+        console.log(result);
+        item.addEventListener('click', () => {
+            // Устанавливаем выбранный адрес в поле ввода
+            input.value = result.address.formatted_address;
+            container.innerHTML = ''; // Очищаем подсказки
+            container.style.display = 'none'; // Скрываем контейнер
+            input.focus(); // Устанавливаем фокус обратно на поле ввода
+        });
+
+        container.appendChild(item);
+    });
+
+    container.style.display = 'block'; // Отображаем контейнер с подсказками
+}
+
+// Обработчики событий для полей ввода
+inputStart.addEventListener('input', () => fetchSuggestions(inputStart, suggestionsStart));
+inputEnd.addEventListener('input', () => fetchSuggestions(inputEnd, suggestionsEnd));
+
     var multiRoute;
     var routeCoordinates;
+    
 
             document.getElementById('routeButton').onclick = function() {
                 // var startAddress = "Москва, Инновационный центр Сколково, Большой бульвар";
@@ -201,22 +286,64 @@
                         }, {
                             boundsAutoApply: true
                         });
-                        // Добавляем маршрут на карту
-                        myMap.geoObjects.add(multiRoute);
-                        
-                        // // Получаем координаты всех точек маршрута
-                        // var routeCoordinates = multiRoute.getCoordinates();
-                        // console.log('Координаты всех точек маршрута:');
-                        // routeCoordinates.forEach(function(coords) {
-                        //     console.log(`Широта: ${coords[1]}, Долгота: ${coords[0]}`);
-                        // });
+                       // Добавляем маршрут на карту
+myMap.geoObjects.add(multiRoute);
+let routePoints = [];
+// let coef = [0.3, 0.5, 0.2, 0.1, 0.1,0];
+let coef = [0.6, 0.8,0.9];
+// Функция для получения цвета в зависимости от коэффициента
+function getGradientColor(value) {
+    value = Math.max(0, Math.min(1, value));
+    const red = Math.floor(value * 255);
+    const green = Math.floor((1 - value) * 255);
+    const blue = 0;
+    const hexColor = `#${((1 << 24) + (red << 16) + (green << 8) + blue).toString(16).slice(1)}`;
+    return hexColor;
+}
 
-                        
-                        routeCoordinates = multiRoute.getCoordinates();
+// Подписываемся на событие построения мультимаршрута
+multiRoute.model.events.add('requestsuccess', function() {
+    var activeRoute = multiRoute.getActiveRoute();
+    var activeRoutePaths = activeRoute.getPaths(); 
+    let v = 0;
+
+    activeRoutePaths.each(function(path) {
+        var segments = path.getSegments(); 
+
+        segments.each(function(segment, index) {
+            // Получаем коэффициент для текущего сегмента
+            const coefIndex = index % coef.length; // Индекс коэффициента
+            const currentCoef = coef[coefIndex];
+
+            // Вычисляем цвет для текущего сегмента
+            const color1 = {
+                strokeWidth: 10,
+                strokeColor: getGradientColor(currentCoef),
+                strokeStyle: "solid"
+            };
+
+            segment.options.set({ preset: color1 });
+
+            // Получаем координаты сегмента
+            const coords = segment.geometry._coordPath._coordinates;
+            for(let i = 0; i < coords.length; i++){
+                routePoints.push(coords[i]);
+            }
+
+            // Вывод информации о сегменте
+            console.log("Маневр в конце сегмента: " + segment.properties.get("action").text);
+            console.log("Длина сегмента: " + segment.properties.get("distance").text);
+            console.log("Время прохождения сегмента: " + segment.properties.get("duration").text);
+            console.log("По какой улице проходит сегмент: " + segment.properties.get("street"));
+        });
+    });});
+                        // routeCoordinates = multiRoute.getCoordinates();
+                        // console.log(multiRoute);
 
                     });
                 }).catch(function (error) {
-                    alert('Не удалось найти указанные адреса. Пожалуйста, проверьте их.');
+                    console.log(error);
+                    // alert('Не удалось найти указанные адреса. Пожалуйста, проверьте их.');
                 });
             };
   }
@@ -225,8 +352,7 @@
       ymaps.ready(init);
     }
   );
-</script>
-<script>
+
   let averageRating = 4.5;
   let totalRatings = 1500;
   let userRating = 4;
@@ -291,13 +417,17 @@
 }
 
   function saveChanges() {
-      alert(`Оценка ${userRating} сохранена!`);
+      if(routePoints)
+        alert(`Оценка ${userRating} сохранена!`);
+      else
+        alert(`Оценка не сохранена!`);
       // Здесь можно добавить код для отправки данных на сервер
     
       const csrftoken = getCookie('csrftoken');
+      console.log(routePoints);
       data = {
         "mark":userRating,
-        "points":[],
+        "points":routePoints,
         'csrfmiddlewaretoken':csrftoken
       }
       $.post(
