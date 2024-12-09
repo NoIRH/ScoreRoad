@@ -256,6 +256,16 @@ inputEnd.addEventListener('input', () => fetchSuggestions(inputEnd, suggestionsE
                 var startAddress = document.getElementById('start').value;
                 // var endAddress = "Красная площадь, Москва";
                 var endAddress = document.getElementById('end').value;
+                trueAdresses  = [
+                  'Московская область, Дубна, Университетская улица, 9',
+                  'Московская область, Дубна, улица Энтузиастов, 4',
+                  'Московская область, Дубна, улица В.И. Векслера',
+                  'Московская область, Дубна, Станционная улица',
+                  'Тверская область, Калязинский муниципальный округ, село Нерль',
+                  'Тверская область, Калязинский муниципальный округ, деревня Сорокино (Воронцовский сельский округ)'
+                ];
+                isDrawLine  = (trueAdresses.indexOf(startAddress) >-1 || trueAdresses.indexOf(endAddress)>-1);
+                isBadRoad  =  (trueAdresses.indexOf(startAddress) > 3 || trueAdresses.indexOf(endAddress)>3);;
 
                 console.log(startAddress);
                 console.log(endAddress);
@@ -289,8 +299,11 @@ inputEnd.addEventListener('input', () => fetchSuggestions(inputEnd, suggestionsE
                        // Добавляем маршрут на карту
 myMap.geoObjects.add(multiRoute);
 let routePoints = [];
-// let coef = [0.3, 0.5, 0.2, 0.1, 0.1,0];
-let coef = [0.6, 0.8,0.9];
+let coef =[];
+if(!isBadRoad)
+  coef = [0.3, 0.5, 0.2, 0.1, 0.1,0];
+else
+  coef = [0.6, 0.8,0.9];
 // Функция для получения цвета в зависимости от коэффициента
 function getGradientColor(value) {
     value = Math.max(0, Math.min(1, value));
@@ -314,11 +327,14 @@ multiRoute.model.events.add('requestsuccess', function() {
             // Получаем коэффициент для текущего сегмента
             const coefIndex = index % coef.length; // Индекс коэффициента
             const currentCoef = coef[coefIndex];
-
+            if(isDrawLine)
+              drawColor = getGradientColor(currentCoef)
+            else 
+              drawColor = '#000000';
             // Вычисляем цвет для текущего сегмента
             const color1 = {
                 strokeWidth: 10,
-                strokeColor: getGradientColor(currentCoef),
+                strokeColor: drawColor,
                 strokeStyle: "solid"
             };
 
